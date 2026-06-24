@@ -1,6 +1,6 @@
 # 🤖 Claude Engineering Loop
 
-Stop babysitting your AI agent. Bring a predictable, structured software development cycle to Claude Code.
+A structured process for Claude Code — phases, planning, verification, escape hatches.
 
 ---
 
@@ -8,7 +8,7 @@ Stop babysitting your AI agent. Bring a predictable, structured software develop
 
 If you let Claude Code run autonomously, it code-dumps without a clear goal, forgets its own context, and declares victory before verifying the results. You end up debugging AI-generated bugs instead of shipping features.
 
-This is a drop-in `CLAUDE.md` template that enforces mandatory planning phases, hard limits on retry loops, and an automatic escape hatch before Claude burns through your API credits.
+This is a drop-in `CLAUDE.md` template that defines a mandatory planning process, hard limits on retry loops, and an automatic escape hatch before Claude burns through your API credits.
 
 ---
 
@@ -20,7 +20,7 @@ A single `CLAUDE.md` file that defines a mandatory 9-phase process for every tas
 Receive → Understand → Decompose → Plan → Align → Execute → Verify → [Gap? → Plan]
 ```
 
-**Key behaviors it enforces:**
+**Key behaviors it defines:**
 
 - Agent confirms understanding with you before touching any code
 - Every task is broken into blocks, each with an explicit plan
@@ -192,6 +192,23 @@ Both can coexist: global sets the process, per-project overrides with specifics.
 
 ---
 
+## ⚠️ Probabilistic, not deterministic
+
+The Engineering Loop is a process guide, not an enforcement system. LLMs follow instructions reliably in most cases — but a capable model with extended thinking can rationalize skipping phases when a task looks "obvious". The model reads the instructions, understands them, and still decides they don't apply right now.
+
+This is a known property of instruction-following in LLMs, not a bug in the template.
+
+**To maximize compliance:**
+
+- **Mention the loop explicitly in your prompt.** "Follow the Engineering Loop" or "start with the mode question" in the task message significantly improves compliance — the instruction is fresh in context when the model starts reasoning.
+- **Interrupt when phases are skipped.** If the agent jumps straight to coding, stop it: "You're skipping the loop — go back to Phase 0." Self-correction works well once the model is reminded.
+- **Fresh sessions help.** A model mid-session with lots of context is more likely to shortcut. Start a new session for significant tasks.
+- **Avoid conflicting plugins.** Any plugin that instructs the model to "act immediately before any response" competes with the mode question. The loop works best without aggressive system-level plugins.
+
+The loop works as a shared contract between you and the agent. When both sides reference it, compliance is high. When only the file does, it's probabilistic.
+
+---
+
 ## 🔍 How to verify the loop is working
 
 Claude should name the current phase at each transition. If it silently jumps to writing code — it's not following the loop.
@@ -204,7 +221,7 @@ Claude should name the current phase at each transition. If it silently jumps to
 
 **Signs it's not:** starts coding immediately without asking the mode question, never mentions phases in Interactive/Autonomous, declares done without verifying.
 
-If not working: restart the session, confirm `CLAUDE.md` is in the project root or `~/.claude/`.
+**If it skips phases:** this is expected occasionally — see the Probabilistic section above. Interrupt and redirect: "Stop. You skipped the loop. Ask me for mode and restart from Phase 0." The model knows the rules and self-corrects well when prompted directly.
 
 ---
 
